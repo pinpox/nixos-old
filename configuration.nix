@@ -104,6 +104,30 @@ programs.zsh = {
   autosuggestions.enable = true;
 };
 
+programs.chromium = {
+  enable = true;
+  extensions = [
+    "nngceckbapebfimnlniiiahkandclblb" # Bitwarden
+    "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
+    "gcbommkclmclpchllfjekcdonpmejbdp" # HTTPS Everywhere
+    "lbhnkgjaoonakhladmcjkemebepeohkn" # Vim Tips New Tab
+  ];
+
+  extraOpts = {
+    "BrowserSignin" = 0;
+    "SyncDisabled" = true;
+    "PasswordManagerEnabled" = false;
+    "SpellcheckEnabled" = true;
+    "SpellcheckLanguage" = [
+    "de"
+    "en-US"
+    ];
+  };
+};
+
+
+
+
 
 # Virtualbox stuff
 nixpkgs.config.allowUnfree = true;
