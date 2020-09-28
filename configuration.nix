@@ -65,6 +65,7 @@ environment.systemPackages = with pkgs; [
   python
   ruby
   go
+  ripgrep
   nodejs
   killall
   chromium
