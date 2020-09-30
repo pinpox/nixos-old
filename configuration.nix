@@ -234,7 +234,6 @@ services.xserver = {
       picom
     ];
 
-    configFile = ./configs/i3/config;
   };
 };
 
@@ -619,7 +618,7 @@ users = {
     # TODO xsession management
     #
     #xdg.configHome = ~/.config;
-    xdg.configFile."i3/config".source = ./configs/i3/config;
+    xdg.configFile."i3/config".source = ./user-configs/i3/config;
   };
 
 
