@@ -26,7 +26,7 @@ boot.loader.grub.efiSupport = true;
 boot.loader.efi.canTouchEfiVariables = true;
 boot.cleanTmpDir = true;
 
-nix.allowedUsers = ["root" "pinpox2" "pinpox"];
+nix.allowedUsers = ["root" "pinpox"];
 
 boot.initrd.luks.devices = {
   root = {
@@ -233,6 +233,8 @@ services.xserver = {
       playerctl
       picom
     ];
+
+    configFile = ./configs/i3/config;
   };
 };
 
@@ -253,33 +255,9 @@ fonts = {
 # Define a user account. Don't forget to set a password with ‘passwd’.
 users = {
   defaultUserShell = pkgs.zsh;
-  extraUsers.pinpox = {
-    isNormalUser = true;
-    home = "/home/pinpox";
-    description = "Pablo";
-    extraGroups = [ "wheel" "networkmanager" "audio"];
-    shell = pkgs.zsh;
-
-    openssh.authorizedKeys.keyFiles = [
-      (
-        builtins.fetchurl {
-          url    = "https://pablo.tools/ssh-key";
-        }
-        )
-        ( builtins.fetchurl {
-          url    = "https://github.com/pinpox.keys";
-        }
-        )
-      ];
-
-      packages = with pkgs; [
-        thunderbird
-      ];
-    };
-
-    extraUsers.pinpox2 = {
+    extraUsers.pinpox = {
       isNormalUser = true;
-      home = "/home/pinpox2";
+      home = "/home/pinpox";
       description = "Pablo2";
       extraGroups = [ "wheel" "networkmanager" "audio"];
       shell = pkgs.zsh;
@@ -302,7 +280,7 @@ users = {
       };
     };
 
-    home-manager.users.pinpox2 = {
+    home-manager.users.pinpox= {
     # Email
     accounts.email.accounts = {
     pablo_tools = {
@@ -639,57 +617,9 @@ users = {
 
 
     # TODO xsession management
-    xsession.windowManager.i3 = {
-      enable = true;
-      package = pkgs.i3-gaps;
-      config = {
-        # colors = {
-        #   background = "TODO";
-        #   focused = "TODO";
-        #   focusedInactive = "TODO";
-        #   placeholder= "TODO";
-        #   unfocused= "TODO";
-        #   urgent= "TODO";
-        # };
-
-        floating = {
-          border = 2;
-        };
-
-        focus = {
-          followMouse = true;
-          forceWrapping = true;
-        };
-
-        fonts = ["Source Code Pro Semibold 12"];
-
-        gaps = {
-          bottom = 5;
-          horizontal = 5;
-          inner = 5;
-          left = 5;
-          outer = 5;
-          right = 5;
-          top = 5;
-          vertical = 5;
-          # smartBorders = on;
-          # smartGaps = on;
-        };
-        # keybindings = {TODO}
-        modifier = "Mod4";
-
-        # startup = {
-        #   TODO autostart commands
-        # }
-
-        terminal = "alacritty";
-
-        # window = "TODO"
-        workspaceLayout = "tabbed";
-
-
-      };
-    };
+    #
+    #xdg.configHome = ~/.config;
+    xdg.configFile."i3/config".source = ./configs/i3/config;
   };
 
 
