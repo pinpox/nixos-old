@@ -4,12 +4,18 @@
 
 { config, pkgs, ... }:
 
+# let
+#   home-manager = builtins.fetchGit {
+#     url = "https://github.com/rycee/home-manager.git";
+#     rev = "abfb4cde51856dbee909f373b59cd941f51c2170" ;
+#     ref = "release-20.03";
+#   };
+# in
 {
   imports =
     [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    (import "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/master.tar.gz}/nixos")
-
+    ./home-manager/nixos
   ];
 
 # Use the systemd-boot EFI boot loader.
@@ -20,7 +26,7 @@ boot.loader.grub.efiSupport = true;
 boot.loader.efi.canTouchEfiVariables = true;
 boot.cleanTmpDir = true;
 
-nix.allowedUsers = ["root" "pinpox"];
+nix.allowedUsers = ["root" "pinpox2" "pinpox"];
 
 boot.initrd.luks.devices = {
   root = {
@@ -63,7 +69,7 @@ environment.variables = {
 
 # Needed for zsh completion of system packages, e.g. systemd
 
-  environment.pathsToLink = [ "/share/zsh" ];
+environment.pathsToLink = [ "/share/zsh" ];
 
 
 
@@ -92,6 +98,7 @@ environment.systemPackages = with pkgs; [
   antibody
   gnumake
   ctags
+  dconf
   pavucontrol
 ];
 
@@ -269,11 +276,66 @@ users = {
         thunderbird
       ];
     };
+
+    extraUsers.pinpox2 = {
+      isNormalUser = true;
+      home = "/home/pinpox2";
+      description = "Pablo2";
+      extraGroups = [ "wheel" "networkmanager" "audio"];
+      shell = pkgs.zsh;
+
+      openssh.authorizedKeys.keyFiles = [
+        (
+          builtins.fetchurl {
+            url    = "https://pablo.tools/ssh-key";
+          }
+          )
+          ( builtins.fetchurl {
+            url    = "https://github.com/pinpox.keys";
+          }
+          )
+        ];
+
+        packages = with pkgs; [
+          thunderbird
+        ];
+      };
+    };
+
+    home-manager.users.pinpox2 = {
+    # Email
+    accounts.email.accounts = {
+    pablo_tools = {
+      address = "mail@pablo.tools";
+      primary = true;
+      # gpg = {
+      #   # key = "";
+      #   signByDefault = true;
+      # };
+      # imap.host = "posteo.de";
+      # mbsync = {
+      #   enable = true;
+      #   create = "maildir";
+      # };
+      # msmtp.enable = true;
+      # notmuch.enable = true;
+      # primary = true;
+      # realName = "Ben Justus Bals";
+      # signature = {
+      #   text = ''
+      #     mfg pablo
+      #   '';
+      #   showSignature = "append";
+      # };
+      # passwordCommand = "mail-password";
+      # smtp = {
+      #   host = "";
+      # };
+      # userName = "";
+    };
   };
 
-  home-manager.users.pinpox = {
-    # Email
-    accounts.email.accounts = [ "mail@pablo.tools"];
+
     # accounts.email.accounts.<name>.gpg
 
     # Fontconfig
@@ -285,20 +347,19 @@ users = {
       font = {
         # package = "Source Code Pro Semibold";
         name = "Source Code Pro Semibold";
-
       };
       gtk2 = {
-        extraConfig = "gtk-can-change-accels = 1"
+        extraConfig = "gtk-can-change-accels = 1";
       };
 
       gtk3 = {
-        extraConfig =  { gtk-cursor-blink = false; gtk-recent-files-limit = 20; }
+        extraConfig =  { gtk-cursor-blink = false; gtk-recent-files-limit = 20; };
         bookmarks = [ "file:///home/pinpox/Documents" ];
       };
 
       iconTheme = {
-        package = "Papirus";
-        name = "TODO";
+        package = pkgs.papirus-icon-theme;
+        name = "Papirus";
       };
 
 
@@ -367,7 +428,7 @@ users = {
         signing = {
           key = "TODO";
           signByDefault = true;
-        }
+        };
 
         userEmail = "git@pablo.tools";
         userName = "Pablo Ovelleiro Corral";
@@ -377,8 +438,8 @@ users = {
       # programs.gpg = {TODO}
       programs.htop = {
         enable = true;
-        enableMouse = true;
-        showCpuFrequency = true;
+        # enableMouse = true;
+        # showCpuFrequency = true;
         treeView = true;
       };
 
@@ -408,7 +469,7 @@ users = {
       viAlias = true;
       vimAlias = true;
       vimdiffAlias = true;
-      withNodJs = true;
+      withNodeJs = true;
       withPython = true;
       withPython3 = true;
       withRuby = true;
@@ -418,7 +479,7 @@ users = {
       enable = true;
       package = pkgs.pass.withExtensions (exts: [ exts.pass-otp ]);
       # settings = TODO
-    }
+    };
 
     # TODO maybe replace with zoxide
     programs.pazi = {
@@ -427,16 +488,14 @@ users = {
     };
 
     # TODO
-  # https://github.com/knqyf263/pet
-    # programs.pet
-    # programs.poweline-go
-    # programs.readline
+    # poweline-go
+    # readline
 
 
     programs.rofi = {
       enable = true;
       # TODO
-      # colors = 
+      # colors =
       # br
     };
 
@@ -459,11 +518,10 @@ users = {
       enable = true;
       enableAutosuggestions = true;
       enableCompletion = true;
-      enableVTteIntegration = true;
       autocd = true;
       dotDir = ".config/zsh";
-      # history = 
-      # initExtra = 
+      # history =
+      # initExtra =
       # TODO extra options
       # plugins
     };
@@ -494,19 +552,19 @@ users = {
         scrolling.history = 10000;
         font = {
           normal = {
-            family: "Office Code Pro";
+            family =  "Office Code Pro";
           };
           bold= {
-            family: "Office Code Pro";
-            style: "bold";
+            family =  "Office Code Pro";
+            style =  "bold";
           };
 
           italic= {
-            family: "Office Code Pro";
-            style: "italic";
+            family =  "Office Code Pro";
+            style  = "italic";
           };
-          size: 10;
-        }
+          size =  10;
+        };
 
         key_bindings = [
           {
@@ -515,15 +573,15 @@ users = {
             chars = "\\x0c";
           }
         ];
-      }
+      };
     };
 
 
 
 
-    services.blueman-applet.enable = true
+    services.blueman-applet.enable = true;
 
-      # TODO checkout 
+      # TODO checkout
     # services.cbatticon = {
       # enable = true;
     # };
@@ -546,10 +604,10 @@ users = {
     #TODO check out
     # services.grobi
 
-    services.network-manager-applet.enable = true
+    services.network-manager-applet.enable = true;
 
     # Pulseaudio tray
-    services.pasystray.enabl = true
+    services.pasystray.enable = true;
 
     # Picom X11 compositor
     services.picom = {
@@ -557,10 +615,10 @@ users = {
       # activeOpacity = TODO
       # backend = TODO
       # TODO: other options
-    }
+    };
 
     # TODO configure polybar
-    # services.polybar.enable = true 
+    # services.polybar.enable = true
 
 
     # servieces.random-background = {} TODO
@@ -583,16 +641,16 @@ users = {
     # TODO xsession management
     xsession.windowManager.i3 = {
       enable = true;
-      package = "pkss.i3-gaps";
+      package = pkgs.i3-gaps;
       config = {
-        colors = {
-          background = "TODO";
-          focused = "TODO";
-          focusedInactive = "TODO";
-          placeholder= "TODO";
-          unfocused= "TODO";
-          urgent= "TODO";
-        };
+        # colors = {
+        #   background = "TODO";
+        #   focused = "TODO";
+        #   focusedInactive = "TODO";
+        #   placeholder= "TODO";
+        #   unfocused= "TODO";
+        #   urgent= "TODO";
+        # };
 
         floating = {
           border = 2;
@@ -603,7 +661,7 @@ users = {
           forceWrapping = true;
         };
 
-        fonts = "Source Code Pro Semibold 12";
+        fonts = ["Source Code Pro Semibold 12"];
 
         gaps = {
           bottom = 5;
@@ -614,8 +672,8 @@ users = {
           right = 5;
           top = 5;
           vertical = 5;
-          smartBorders = on;
-          smartGaps = on;
+          # smartBorders = on;
+          # smartGaps = on;
         };
         # keybindings = {TODO}
         modifier = "Mod4";
@@ -632,11 +690,10 @@ users = {
 
       };
     };
-
-  
-
-
   };
+
+
+
 
 # This value determines the NixOS release from which the default
 # settings for stateful data, like file locations and database versions
