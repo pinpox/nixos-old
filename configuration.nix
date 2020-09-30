@@ -61,6 +61,11 @@ environment.variables = {
   VISUAL = "nvim";
 };
 
+# Needed for zsh completion of system packages, e.g. systemd
+
+  environment.pathsToLink = [ "/share/zsh" ];
+
+
 
 # List packages installed in system profile. To search, run:
 # $ nix search wget
@@ -377,8 +382,96 @@ users = {
         treeView = true;
       };
 
-      TODO continue here:
-      https://rycee.gitlab.io/home-manager/options.html#opt-programs.jq.enable
+      programs.jq = {
+        enable = true;
+      };
+
+      programs.keychain = {
+        enable = true;
+        enableZshIntegration = true;
+        enableXsessionIntegration = true;
+      };
+
+
+      # programs.mcfly.
+
+    # programs.mvp
+    programs.neomutt = {
+      enable =  true;
+      # TODO
+    };
+
+
+    programs.neovim = {
+      enable = true;
+      # TODO
+      viAlias = true;
+      vimAlias = true;
+      vimdiffAlias = true;
+      withNodJs = true;
+      withPython = true;
+      withPython3 = true;
+      withRuby = true;
+    };
+
+    programs.password-store = {
+      enable = true;
+      package = pkgs.pass.withExtensions (exts: [ exts.pass-otp ]);
+      # settings = TODO
+    }
+
+    # TODO maybe replace with zoxide
+    programs.pazi = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
+    # TODO
+  # https://github.com/knqyf263/pet
+    # programs.pet
+    # programs.poweline-go
+    # programs.readline
+
+
+    programs.rofi = {
+      enable = true;
+      # TODO
+      # colors = 
+      # br
+    };
+
+    # TODO ssh client config
+
+    # TODO look at starship theme for zsh
+    # programs.starship = {
+    #   enable = true;
+    #   enableZshIntegration = true;
+    # };
+
+    programs.tmux = {
+      enable = true;
+      clock24 = true;
+      # TODO other optoins
+
+    };
+
+    programs.zsh = {
+      enable = true;
+      enableAutosuggestions = true;
+      enableCompletion = true;
+      enableVTteIntegration = true;
+      autocd = true;
+      dotDir = ".config/zsh";
+      # history = 
+      # initExtra = 
+      # TODO extra options
+      # plugins
+    };
+
+
+
+
+
 
 
     # Alacritty
@@ -424,6 +517,125 @@ users = {
         ];
       }
     };
+
+
+
+
+    services.blueman-applet.enable = true
+
+      # TODO checkout 
+    # services.cbatticon = {
+      # enable = true;
+    # };
+
+    services.dunst = {
+      enable = true;
+      # iconTheme
+      # settings = {}
+    };
+
+    services.gnome-keyring = {
+      enable = true;
+    };
+
+    services.gpg-agent = {
+      enable = true;
+      enableSshSupport = true;
+    };
+
+    #TODO check out
+    # services.grobi
+
+    services.network-manager-applet.enable = true
+
+    # Pulseaudio tray
+    services.pasystray.enabl = true
+
+    # Picom X11 compositor
+    services.picom = {
+      enable = true;
+      # activeOpacity = TODO
+      # backend = TODO
+      # TODO: other options
+    }
+
+    # TODO configure polybar
+    # services.polybar.enable = true 
+
+
+    # servieces.random-background = {} TODO
+    # services.spotifyd = {} TODO
+    # services.syncthing = {} TODO
+    # services.udiskie= {} TODO
+
+    services.xscreensaver = {
+      enable = true;
+      # settings = TODO
+    };
+
+    # services.xsuspender
+
+
+    # TODO xdg management
+    # xdg. ...
+
+
+    # TODO xsession management
+    xsession.windowManager.i3 = {
+      enable = true;
+      package = "pkss.i3-gaps";
+      config = {
+        colors = {
+          background = "TODO";
+          focused = "TODO";
+          focusedInactive = "TODO";
+          placeholder= "TODO";
+          unfocused= "TODO";
+          urgent= "TODO";
+        };
+
+        floating = {
+          border = 2;
+        };
+
+        focus = {
+          followMouse = true;
+          forceWrapping = true;
+        };
+
+        fonts = "Source Code Pro Semibold 12";
+
+        gaps = {
+          bottom = 5;
+          horizontal = 5;
+          inner = 5;
+          left = 5;
+          outer = 5;
+          right = 5;
+          top = 5;
+          vertical = 5;
+          smartBorders = on;
+          smartGaps = on;
+        };
+        # keybindings = {TODO}
+        modifier = "Mod4";
+
+        # startup = {
+        #   TODO autostart commands
+        # }
+
+        terminal = "alacritty";
+
+        # window = "TODO"
+        workspaceLayout = "tabbed";
+
+
+      };
+    };
+
+  
+
+
   };
 
 # This value determines the NixOS release from which the default
