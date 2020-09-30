@@ -8,6 +8,8 @@
   imports =
     [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
+    (import "${builtins.fetchTarball https://github.com/rycee/home-manager/archive/master.tar.gz}/nixos")
+
   ];
 
 # Use the systemd-boot EFI boot loader.
@@ -18,6 +20,7 @@ boot.loader.grub.efiSupport = true;
 boot.loader.efi.canTouchEfiVariables = true;
 boot.cleanTmpDir = true;
 
+nix.allowedUsers = ["root" "pinpox"];
 
 boot.initrd.luks.devices = {
   root = {
@@ -81,6 +84,7 @@ environment.systemPackages = with pkgs; [
   networkmanagerapplet
   termite
   zsh
+  antibody
   gnumake
   ctags
   pavucontrol
@@ -120,8 +124,8 @@ programs.chromium = {
     "PasswordManagerEnabled" = false;
     "SpellcheckEnabled" = true;
     "SpellcheckLanguage" = [
-    "de"
-    "en-US"
+      "de"
+      "en-US"
     ];
   };
 };
@@ -259,6 +263,166 @@ users = {
       packages = with pkgs; [
         thunderbird
       ];
+    };
+  };
+
+  home-manager.users.pinpox = {
+    # Email
+    accounts.email.accounts = [ "mail@pablo.tools"];
+    # accounts.email.accounts.<name>.gpg
+
+    # Fontconfig
+    # fonts.fontconfig.enable
+
+    # GTK settings
+    gtk = {
+      enable = true;
+      font = {
+        # package = "Source Code Pro Semibold";
+        name = "Source Code Pro Semibold";
+
+      };
+      gtk2 = {
+        extraConfig = "gtk-can-change-accels = 1"
+      };
+
+      gtk3 = {
+        extraConfig =  { gtk-cursor-blink = false; gtk-recent-files-limit = 20; }
+        bookmarks = [ "file:///home/pinpox/Documents" ];
+      };
+
+      iconTheme = {
+        package = "Papirus";
+        name = "TODO";
+      };
+
+
+
+    };
+
+      # General stuff TODO
+      # home.activation...
+      # home.packages...
+      # home.file...
+      # home.keyboard...
+      # home.language...
+      # home.sessionVariables...
+      manual.manpages.enable = true;
+
+
+      # Autorandr
+      # TODO
+
+      # Bat
+      programs.bat = {
+        enable  = true;
+        config = {
+          # TODO look up opionts
+          theme = "TwoDark";
+        };
+        # themes = { TODO };
+      };
+
+      # Broot TODO
+      # programs.broot =
+
+      # Browserpass
+      programs.browserpass = {
+        enable = true;
+        browsers = [ "chromium" "firefox" ];
+      };
+
+      programs.chromium = {
+        enable = true;
+        # extensions = [ TODO ]
+      };
+
+
+      programs.firefox = {
+        enable = true;
+        # profiles = TODO
+        # extensions = [ TODO ]
+      };
+
+      programs.fzf = {
+        enable = true;
+        enableZshIntegration = true;
+        # TODO more options
+      };
+
+      programs.dircolors = {
+        enable = true;
+        enableZshIntegration = true;
+      };
+
+      programs.git = {
+        enable = true;
+        # ignores TODO
+        # extraConfig TODO
+        signing = {
+          key = "TODO";
+          signByDefault = true;
+        }
+
+        userEmail = "git@pablo.tools";
+        userName = "Pablo Ovelleiro Corral";
+      };
+
+      # programs.go = {TODO}
+      # programs.gpg = {TODO}
+      programs.htop = {
+        enable = true;
+        enableMouse = true;
+        showCpuFrequency = true;
+        treeView = true;
+      };
+
+      TODO continue here:
+      https://rycee.gitlab.io/home-manager/options.html#opt-programs.jq.enable
+
+
+    # Alacritty
+    programs.alacritty = {
+      enable = true;
+      settings = {
+        env.TERM = "xterm-256color";
+        window = {
+          dimensions = {
+            lines = 3;
+            columns = 200;
+          };
+
+          padding = {
+            lines = 3;
+            columns = 200;
+          };
+        };
+
+        scrolling.history = 10000;
+        font = {
+          normal = {
+            family: "Office Code Pro";
+          };
+          bold= {
+            family: "Office Code Pro";
+            style: "bold";
+          };
+
+          italic= {
+            family: "Office Code Pro";
+            style: "italic";
+          };
+          size: 10;
+        }
+
+        key_bindings = [
+          {
+            key = "K";
+            mods = "Control";
+            chars = "\\x0c";
+          }
+        ];
+      }
     };
   };
 
