@@ -4,18 +4,11 @@
 
 { config, pkgs, ... }:
 
-# let
-#   home-manager = builtins.fetchGit {
-#     url = "https://github.com/rycee/home-manager.git";
-#     rev = "abfb4cde51856dbee909f373b59cd941f51c2170" ;
-#     ref = "release-20.03";
-#   };
-# in
 {
   imports =
     [ # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    ./home-manager/nixos
+    #./home-manager/nixos
   ];
 
 # Use the systemd-boot EFI boot loader.
@@ -82,7 +75,6 @@ environment.systemPackages = with pkgs; [
   ripgrep
   nodejs
   killall
-  chromium
   arandr
   lxappearance
   nitrogen
@@ -102,6 +94,17 @@ environment.systemPackages = with pkgs; [
   pavucontrol
 ];
 
+programs.chromium = {
+	enable = true;
+	extraOpts = {
+		"BrowserSignin" = 0;
+		"SyncDisabled" = true;
+		"PasswordManagerEnabled" = false;
+		"SpellcheckEnabled" = true;
+		"SpellcheckLanguage" = [ "de" "en-US" ];
+	};
+};
+
 
 # Some programs need SUID wrappers, can be configured further or are
 # started in user sessions.
@@ -119,27 +122,6 @@ programs.zsh = {
   };
   enableCompletion = true;
   autosuggestions.enable = true;
-};
-
-programs.chromium = {
-  enable = true;
-  extensions = [
-    "nngceckbapebfimnlniiiahkandclblb" # Bitwarden
-    "cjpalhdlnbpafiamejdnhcphjbkeiagm" # uBlock Origin
-    "gcbommkclmclpchllfjekcdonpmejbdp" # HTTPS Everywhere
-    "lbhnkgjaoonakhladmcjkemebepeohkn" # Vim Tips New Tab
-  ];
-
-  extraOpts = {
-    "BrowserSignin" = 0;
-    "SyncDisabled" = true;
-    "PasswordManagerEnabled" = false;
-    "SpellcheckEnabled" = true;
-    "SpellcheckLanguage" = [
-      "de"
-      "en-US"
-    ];
-  };
 };
 
 
@@ -254,375 +236,19 @@ fonts = {
 # Define a user account. Don't forget to set a password with ‘passwd’.
 users = {
   defaultUserShell = pkgs.zsh;
-    extraUsers.pinpox = {
+    users.pinpox = {
       isNormalUser = true;
       home = "/home/pinpox";
-      description = "Pablo2";
+      description = "Pablo Ovelleiro Corral";
       extraGroups = [ "wheel" "networkmanager" "audio"];
       shell = pkgs.zsh;
 
       openssh.authorizedKeys.keyFiles = [
-        (
-          builtins.fetchurl {
-            url    = "https://pablo.tools/ssh-key";
-          }
-          )
-          ( builtins.fetchurl {
-            url    = "https://github.com/pinpox.keys";
-          }
-          )
-        ];
-
-        packages = with pkgs; [
-          thunderbird
-        ];
-      };
-    };
-
-    home-manager.users.pinpox= {
-    # Email
-    accounts.email.accounts = {
-    pablo_tools = {
-      address = "mail@pablo.tools";
-      primary = true;
-      # gpg = {
-      #   # key = "";
-      #   signByDefault = true;
-      # };
-      # imap.host = "posteo.de";
-      # mbsync = {
-      #   enable = true;
-      #   create = "maildir";
-      # };
-      # msmtp.enable = true;
-      # notmuch.enable = true;
-      # primary = true;
-      # realName = "Ben Justus Bals";
-      # signature = {
-      #   text = ''
-      #     mfg pablo
-      #   '';
-      #   showSignature = "append";
-      # };
-      # passwordCommand = "mail-password";
-      # smtp = {
-      #   host = "";
-      # };
-      # userName = "";
-    };
-  };
-
-
-    # accounts.email.accounts.<name>.gpg
-
-    # Fontconfig
-    # fonts.fontconfig.enable
-
-    # GTK settings
-    gtk = {
-      enable = true;
-      font = {
-        # package = "Source Code Pro Semibold";
-        name = "Source Code Pro Semibold";
-      };
-      gtk2 = {
-        extraConfig = "gtk-can-change-accels = 1";
-      };
-
-      gtk3 = {
-        extraConfig =  { gtk-cursor-blink = false; gtk-recent-files-limit = 20; };
-        bookmarks = [ "file:///home/pinpox/Documents" ];
-      };
-
-      iconTheme = {
-        package = pkgs.papirus-icon-theme;
-        name = "Papirus";
-      };
-
-
-
-    };
-
-      # General stuff TODO
-      # home.activation...
-      # home.packages...
-      # home.file...
-      # home.keyboard...
-      # home.language...
-      # home.sessionVariables...
-      manual.manpages.enable = true;
-
-
-      # Autorandr
-      # TODO
-
-      # Bat
-      programs.bat = {
-        enable  = true;
-        config = {
-          # TODO look up opionts
-          theme = "TwoDark";
-        };
-        # themes = { TODO };
-      };
-
-      # Broot TODO
-      # programs.broot =
-
-      # Browserpass
-      programs.browserpass = {
-        enable = true;
-        browsers = [ "chromium" "firefox" ];
-      };
-
-      programs.chromium = {
-        enable = true;
-        # extensions = [ TODO ]
-      };
-
-
-      programs.firefox = {
-        enable = true;
-        # profiles = TODO
-        # extensions = [ TODO ]
-      };
-
-      programs.fzf = {
-        enable = true;
-        enableZshIntegration = true;
-        # TODO more options
-      };
-
-      programs.dircolors = {
-        enable = true;
-        enableZshIntegration = true;
-      };
-
-      programs.git = {
-        enable = true;
-        # ignores TODO
-        # extraConfig TODO
-        signing = {
-          key = "TODO";
-          signByDefault = true;
-        };
-
-        userEmail = "git@pablo.tools";
-        userName = "Pablo Ovelleiro Corral";
-      };
-
-      # programs.go = {TODO}
-      # programs.gpg = {TODO}
-      programs.htop = {
-        enable = true;
-        # enableMouse = true;
-        # showCpuFrequency = true;
-        treeView = true;
-      };
-
-      programs.jq = {
-        enable = true;
-      };
-
-      programs.keychain = {
-        enable = true;
-        enableZshIntegration = true;
-        enableXsessionIntegration = true;
-      };
-
-
-      # programs.mcfly.
-
-    # programs.mvp
-    programs.neomutt = {
-      enable =  true;
-      # TODO
-    };
-
-
-    programs.neovim = {
-      enable = true;
-      # TODO
-      viAlias = true;
-      vimAlias = true;
-      vimdiffAlias = true;
-      withNodeJs = true;
-      withPython = true;
-      withPython3 = true;
-      withRuby = true;
-    };
-
-    programs.password-store = {
-      enable = true;
-      package = pkgs.pass.withExtensions (exts: [ exts.pass-otp ]);
-      # settings = TODO
-    };
-
-    # TODO maybe replace with zoxide
-    programs.pazi = {
-      enable = true;
-      enableZshIntegration = true;
-    };
-
-    # TODO
-    # poweline-go
-    # readline
-
-
-    programs.rofi = {
-      enable = true;
-      # TODO
-      # colors =
-      # br
-    };
-
-    # TODO ssh client config
-
-    # TODO look at starship theme for zsh
-    # programs.starship = {
-    #   enable = true;
-    #   enableZshIntegration = true;
-    # };
-
-    programs.tmux = {
-      enable = true;
-      clock24 = true;
-      # TODO other optoins
-
-    };
-
-    programs.zsh = {
-      enable = true;
-      enableAutosuggestions = true;
-      enableCompletion = true;
-      autocd = true;
-      dotDir = ".config/zsh";
-      # history =
-      # initExtra =
-      # TODO extra options
-      # plugins
-    };
-
-
-
-
-
-
-
-    # Alacritty
-    programs.alacritty = {
-      enable = true;
-      settings = {
-        env.TERM = "xterm-256color";
-        window = {
-          dimensions = {
-            lines = 3;
-            columns = 200;
-          };
-
-          padding = {
-            lines = 3;
-            columns = 200;
-          };
-        };
-
-        scrolling.history = 10000;
-        font = {
-          normal = {
-            family =  "Office Code Pro";
-          };
-          bold= {
-            family =  "Office Code Pro";
-            style =  "bold";
-          };
-
-          italic= {
-            family =  "Office Code Pro";
-            style  = "italic";
-          };
-          size =  10;
-        };
-
-        key_bindings = [
-          {
-            key = "K";
-            mods = "Control";
-            chars = "\\x0c";
-          }
-        ];
-      };
-    };
-
-
-
-
-    services.blueman-applet.enable = true;
-
-      # TODO checkout
-    # services.cbatticon = {
-      # enable = true;
-    # };
-
-    services.dunst = {
-      enable = true;
-      # iconTheme
-      # settings = {}
-    };
-
-    services.gnome-keyring = {
-      enable = true;
-    };
-
-    services.gpg-agent = {
-      enable = true;
-      enableSshSupport = true;
-    };
-
-    #TODO check out
-    # services.grobi
-
-    services.network-manager-applet.enable = true;
-
-    # Pulseaudio tray
-    services.pasystray.enable = true;
-
-    # Picom X11 compositor
-    services.picom = {
-      enable = true;
-      # activeOpacity = TODO
-      # backend = TODO
-      # TODO: other options
-    };
-
-    # TODO configure polybar
-    # services.polybar.enable = true
-
-
-    # servieces.random-background = {} TODO
-    # services.spotifyd = {} TODO
-    # services.syncthing = {} TODO
-    # services.udiskie= {} TODO
-
-    services.xscreensaver = {
-      enable = true;
-      # settings = TODO
-    };
-
-    # services.xsuspender
-
-
-    # TODO xdg management
-    # xdg. ...
-
-
-    # TODO xsession management
-    #
-    #xdg.configHome = ~/.config;
-    xdg.configFile."i3/config".source = ./user-configs/i3/config;
-  };
-
-
-
+        ( builtins.fetchurl { url = "https://pablo.tools/ssh-key"; })
+        ( builtins.fetchurl { url = "https://github.com/pinpox.keys"; })
+      ];
+     };
+   };
 
 # This value determines the NixOS release from which the default
 # settings for stateful data, like file locations and database versions
