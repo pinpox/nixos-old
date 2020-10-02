@@ -58,6 +58,8 @@ environment.variables = {
   EDITOR = "nvim";
   GOPATH = "~/.go";
   VISUAL = "nvim";
+# Use librsvg's gdk-pixbuf loader cache file as it enables gdk-pixbuf to load SVG files (important for icons)
+  GDK_PIXBUF_MODULE_FILE = "$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)";
 };
 
 # Needed for zsh completion of system packages, e.g. systemd
@@ -76,23 +78,21 @@ environment.systemPackages = with pkgs; [
   nodejs
   killall
   arandr
-  lxappearance
-  nitrogen
   wget
   neovim
-  i3-gaps
+  # i3-gaps
   ansible
   git
   source-code-pro
-  networkmanagerapplet
   termite
   zsh
   antibody
   gnumake
   ctags
-  dconf
   pavucontrol
 ];
+
+programs.dconf.enable = true;
 
 programs.chromium = {
 	enable = true;
@@ -201,22 +201,23 @@ services.xserver = {
   };
 
   displayManager = {
-    defaultSession = "i3";
+    # defaultSession = "i3";
     startx.enable = true;
   };
 
-  windowManager.i3 = {
-    package = pkgs.i3-gaps;
-    enable = true;
-    extraPackages = with pkgs; [
-      rofi
-      polybar
-      i3lock-fancy
-      playerctl
-      picom
-    ];
+  # windowManager.i3 = {
+  #   package = pkgs.i3-gaps;
+  #   enable = true;
+  #   extraPackages = with pkgs; [
+  #     rofi
+  #     polybar
+  #     i3lock-fancy
+  #     playerctl
+  #     picom
+  #     xorg.xrandr
+  #   ];
 
-  };
+  # };
 };
 
 # Install fonts
@@ -258,6 +259,11 @@ users = {
 # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
 system.stateVersion = "20.03"; # Did you read the comment?
 
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
 }
 
 
