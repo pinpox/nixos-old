@@ -30,19 +30,34 @@ boot.initrd.luks.devices = {
   };
 };
 
-networking.hostName = "baobab"; # Define your hostname.
-# networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+networking  = {
 
-# The global useDHCP flag is deprecated, therefore explicitly set to false here.
-# Per-interface useDHCP will be mandatory in the future, so this generated config
-# replicates the default behaviour.
-networking.useDHCP = false;
-networking.interfaces.enp0s3.useDHCP = true;
-networking.networkmanager.enable = true;
+  hostName = "baobab"; # Define your hostname.
 
-# Configure network proxy if necessary
-# networking.proxy.default = "http://user:password@proxy:port/";
-# networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+  # Enables wireless support via wpa_supplicant.
+  # networking.wireless.enable = true;
+
+  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
+  # Per-interface useDHCP will be mandatory in the future, so this generated config
+  # replicates the default behaviour.
+  useDHCP = false;
+  interfaces.enp0s3.useDHCP = true;
+
+  # Enable networkmanager
+  networkmanager.enable = true;
+
+  # Configure network proxy if necessary
+  # networking.proxy.default = "http://user:password@proxy:port/";
+  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
+
+  # Additional hosts to put in /etc/hosts
+  extraHosts =
+    ''
+      192.168.2.84 backup-server
+    '';
+
+  };
+
 
 # Select internationalisation properties.
 i18n.defaultLocale = "en_US.UTF-8";
@@ -59,7 +74,7 @@ environment.variables = {
   GOPATH = "~/.go";
   VISUAL = "nvim";
 # Use librsvg's gdk-pixbuf loader cache file as it enables gdk-pixbuf to load SVG files (important for icons)
-  GDK_PIXBUF_MODULE_FILE = "$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)";
+GDK_PIXBUF_MODULE_FILE = "$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)";
 };
 
 # Needed for zsh completion of system packages, e.g. systemd
@@ -73,6 +88,8 @@ environment.pathsToLink = [ "/share/zsh" ];
 environment.systemPackages = with pkgs; [
   python
   ruby
+  python
+  borgbackup
   go
   ripgrep
   nodejs
@@ -80,30 +97,24 @@ environment.systemPackages = with pkgs; [
   arandr
   wget
   neovim
-  # i3-gaps
-  ansible
   git
-  source-code-pro
   termite
   zsh
-  antibody
   gnumake
-  ctags
-  pavucontrol
 ];
 
 programs.dconf.enable = true;
 
 programs.chromium = {
-	enable = true;
-	extraOpts = {
-		"BrowserSignin" = 0;
-		"SyncDisabled" = true;
-		"PasswordManagerEnabled" = false;
-		"SpellcheckEnabled" = true;
-		"SpellcheckLanguage" = [ "de" "en-US" ];
-	};
-};
+  enable = true;
+  extraOpts = {
+    "BrowserSignin" = 0;
+    "SyncDisabled" = true;
+    "PasswordManagerEnabled" = false;
+    "SpellcheckEnabled" = true;
+    "SpellcheckLanguage" = [ "de" "en-US" ];
+    };
+    };
 
 
 # Some programs need SUID wrappers, can be configured further or are
@@ -129,7 +140,6 @@ programs.zsh = {
 
 
 # Virtualbox stuff
-nixpkgs.config.allowUnfree = true;
 virtualisation.virtualbox.guest.enable = true;
 
 # List services that you want to enable:
@@ -142,32 +152,27 @@ services.openssh = {
 
   # Enable Wireguard
   networking.wireguard.interfaces = {
-    # "wg0" is the network interface name. You can name the interface arbitrarily.
+
     wg0 = {
+
       # Determines the IP address and subnet of the client's end of the tunnel interface.
       ips = [ "192.168.7.10/24" ];
 
-      # Path to the private key file.
-      #
-      # Note: The private key can also be included inline via the privateKey option,
-      # but this makes the private key world-readable; thus, using privateKeyFile is
-      # recommended.
+      # Path to the private key file.  Note: The private key can also be
+      # included inline via the privateKey option, but this makes the private
+      # key world-readable; thus, using privateKeyFile is recommended.
       privateKeyFile = "/etc/wireguard/privatekey";
-
       peers = [
         # For a client configuration, one peer entry for the server will suffice.
         {
           # Public key of the server (not a file path).
           publicKey = "XKqEk5Hsp3SRVPrhWD2eLFTVEYb9NYRky6AermPG8hU=";
-
           # Forward all the traffic via VPN.
           allowedIPs = [ "192.168.7.0/24" ];
           # Or forward only particular subnets
           #allowedIPs = [ "10.100.0.1" "91.108.12.0/22" ];
-
           # Set this to the server IP and port.
           endpoint = "vpn.pablo.tools:51820";
-
           # Send keepalives every 25 seconds. Important to keep NAT tables alive.
           persistentKeepalive = 25;
         }
@@ -193,6 +198,7 @@ services.xserver = {
   enable = true;
   autorun = true;
   layout = "us";
+  dpi = 125;
   xkbVariant = "colemak";
   xkbOptions = "caps:escape";
 
@@ -204,52 +210,83 @@ services.xserver = {
     # defaultSession = "i3";
     startx.enable = true;
   };
-
-  # windowManager.i3 = {
-  #   package = pkgs.i3-gaps;
-  #   enable = true;
-  #   extraPackages = with pkgs; [
-  #     rofi
-  #     polybar
-  #     i3lock-fancy
-  #     playerctl
-  #     picom
-  #     xorg.xrandr
-  #   ];
-
-  # };
 };
+
+
+nixpkgs = {
+  config.allowUnfree = true;
+};
+
+services.borgbackup.jobs.home = {
+  paths = "/home";
+  encryption = {
+    mode = "repokey";
+    # TODO set pass command for password-store
+    # passCommand = "echo test";
+    passphrase = "test";
+  };
+
+  # TODO auto-place the key
+  environment.BORG_RSH = "ssh -i /root/.ssh/backup-key";
+
+  doInit = false; #Dont create repo if it does not exist
+
+  repo = "ssh://borg@backup-server//mnt/backup/borgbackup/${config.networking.hostName}";
+  extraCreateArgs = "--verbose --list --checkpoint-interval 600";
+  exclude = [
+    "*.pyc"
+    "*/cache2" # firefox
+    ".cache"
+    ".config/Signal"
+    ".config/chromium"
+    ".config/discord"
+    ".container-diff"
+    ".gvfs/"
+    ".local/share/Trash"
+    ".mozilla/firefox/*.default/Cache"
+    ".mozilla/firefox/*.default/OfflineCache"
+    ".npm/_cacache"
+    ".thumbnails"
+    ".ts3client"
+    ".vagrant.d"
+    "/Cache"
+    "Downloads"
+    "VirtualBox VMs"
+    "discord/Cache"
+  ];
+
+  compression = "lz4";
+  startAt = "daily";
+};
+
+
 
 # Install fonts
 fonts = {
   enableFontDir = true;
   fonts = with pkgs; [
-    source-code-pro
-    font-awesome
-    font-awesome_4
-    noto-fonts
+    (nerdfonts.override { fonts = [ "SourceCodePro" ]; })
     noto-fonts-emoji
     corefonts
-    unifont
   ];
 };
 
 # Define a user account. Don't forget to set a password with ‘passwd’.
 users = {
   defaultUserShell = pkgs.zsh;
-    users.pinpox = {
-      isNormalUser = true;
-      home = "/home/pinpox";
-      description = "Pablo Ovelleiro Corral";
-      extraGroups = [ "wheel" "networkmanager" "audio"];
-      shell = pkgs.zsh;
+  users.pinpox = {
+    isNormalUser = true;
+    home = "/home/pinpox";
+    description = "Pablo Ovelleiro Corral";
+    extraGroups = [ "wheel" "networkmanager" "audio"];
+    shell = pkgs.zsh;
 
-      openssh.authorizedKeys.keyFiles = [
-        ( builtins.fetchurl { url = "https://pablo.tools/ssh-key"; })
-        ( builtins.fetchurl { url = "https://github.com/pinpox.keys"; })
-      ];
-     };
-   };
+    openssh.authorizedKeys.keyFiles = [
+      ( builtins.fetchurl { url = "https://pablo.tools/ssh-key"; })
+      ( builtins.fetchurl { url = "https://github.com/pinpox.keys"; })
+    ];
+  };
+};
 
 # This value determines the NixOS release from which the default
 # settings for stateful data, like file locations and database versions
@@ -259,11 +296,11 @@ users = {
 # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
 system.stateVersion = "20.03"; # Did you read the comment?
 
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
-  };
+nix.gc = {
+  automatic = true;
+  dates = "weekly";
+  options = "--delete-older-than 30d";
+};
 }
 
 
