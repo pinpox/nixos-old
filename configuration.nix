@@ -16,14 +16,17 @@
   boot.loader.grub.version = 2;
   boot.loader.grub.device = "nodev";
   boot.loader.grub.efiSupport = true;
+  boot.loader.grub.useOSProber = true;
   boot.loader.efi.canTouchEfiVariables = true;
+
+boot.blacklistedKernelModules = ["nouveau"];
 
   # Encrypted drive to be mounted by the bootloader. Path of the device will
   # have to be changed for each install.
   boot.initrd.luks.devices = {
     root = {
       # Get UUID from blkid /dev/sda2
-      device = "/dev/disk/by-uuid/f4aaaf6d-4eb3-4a2d-a35e-f8e780ac0110";
+      device = "/dev/disk/by-uuid/608e0e77-eea4-4dc4-b88d-76cc63e4488b";
       preLVM = true;
       allowDiscards = true;
     };
@@ -38,7 +41,7 @@
   networking  = {
 
     # Define the hostname
-    hostName = "baobab";
+    hostName = "kartoffel";
 
     # Enables wireless support via wpa_supplicant.
     # networking.wireless.enable = true;
@@ -47,7 +50,7 @@
     # Per-interface useDHCP will be mandatory in the future, so this generated config
     # replicates the default behaviour.
     useDHCP = false;
-    interfaces.enp0s3.useDHCP = true;
+    interfaces.eno1.useDHCP = true;
 
     # Enable networkmanager
     networkmanager.enable = true;
@@ -110,8 +113,8 @@
   programs.chromium = {
     enable = true;
     extraOpts = {
-      "BrowserSignin" = 0;
-      "SyncDisabled" = true;
+      # "BrowserSignin" = 0;
+      # "SyncDisabled" = true;
       "PasswordManagerEnabled" = false;
       "SpellcheckEnabled" = true;
       "SpellcheckLanguage" = [ "de" "en-US" ];
@@ -137,7 +140,7 @@
   };
 
   # Virtualbox stuff
-  virtualisation.virtualbox.guest.enable = true;
+#virtualisation.virtualbox.guest.enable = true;
 
   # Enable the OpenSSH daemon.
   services.openssh = {
@@ -153,7 +156,7 @@
 
         # Determines the IP address and subnet of the client's end of the
         # tunnel interface.
-        ips = [ "192.168.7.10/24" ];
+        ips = [ "192.168.7.2/24" ];
 
         # Path to the private key file
         privateKeyFile = "/secrets/wireguard/privatekey";
@@ -186,17 +189,30 @@
   sound.enable = true;
   hardware.pulseaudio.enable = true;
 
-  # Enable touchpad support.
-  # services.xserver.libinput.enable = true;
-
   # Enable the X11 windowing system.
   services.xserver = {
+	videoDrivers = ["nvidia"];
     enable = true;
     autorun = true;
     layout = "us";
     dpi = 125;
     xkbVariant = "colemak";
     xkbOptions = "caps:escape";
+
+    libinput = {
+      enable = true;
+      accelProfile = "flat";
+    };
+
+    config = ''
+      Section "InputClass"
+        Identifier "mouse accel"
+        Driver "libinput"
+        MatchIsPointer "on"
+        Option "AccelProfile" "flat"
+        Option "AccelSpeed" "0"
+      EndSection
+    '';
 
     desktopManager = {
       xterm.enable = false;
@@ -320,3 +336,4 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "20.03"; # Did you read the comment?
 }
+
