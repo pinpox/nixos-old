@@ -5,11 +5,10 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [
+  imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    ];
+  ];
 
   # Use GRUB2 as EFI boot loader.
   boot.loader.grub.enable = true;
@@ -19,7 +18,7 @@
   boot.loader.grub.useOSProber = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-boot.blacklistedKernelModules = ["nouveau"];
+  boot.blacklistedKernelModules = [ "nouveau" ];
 
   # Encrypted drive to be mounted by the bootloader. Path of the device will
   # have to be changed for each install.
@@ -36,9 +35,9 @@ boot.blacklistedKernelModules = ["nouveau"];
   boot.cleanTmpDir = true;
 
   # Users allowed to run nix
-  nix.allowedUsers = ["root" "pinpox"];
+  nix.allowedUsers = [ "root" "pinpox" ];
 
-  networking  = {
+  networking = {
 
     # Define the hostname
     hostName = "kartoffel";
@@ -49,8 +48,8 @@ boot.blacklistedKernelModules = ["nouveau"];
     # The global useDHCP flag is deprecated, therefore explicitly set to false here.
     # Per-interface useDHCP will be mandatory in the future, so this generated config
     # replicates the default behaviour.
-    useDHCP = false;
-    interfaces.eno1.useDHCP = true;
+    # useDHCP = false;
+    # interfaces.eno1.useDHCP = true;
 
     # Enable networkmanager
     networkmanager.enable = true;
@@ -60,10 +59,9 @@ boot.blacklistedKernelModules = ["nouveau"];
     # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
     # Additional hosts to put in /etc/hosts
-    extraHosts =
-      ''
-        192.168.2.84 backup-server
-      '';
+    extraHosts = ''
+      192.168.2.84 backup-server
+    '';
   };
 
   # Set localization properties and timezone
@@ -82,7 +80,8 @@ boot.blacklistedKernelModules = ["nouveau"];
     VISUAL = "nvim";
     # Use librsvg's gdk-pixbuf loader cache file as it enables gdk-pixbuf to load
     # SVG files (important for icons)
-    GDK_PIXBUF_MODULE_FILE = "$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)";
+    GDK_PIXBUF_MODULE_FILE =
+      "$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)";
   };
 
   # Needed for zsh completion of system packages, e.g. systemd
@@ -132,15 +131,13 @@ boot.blacklistedKernelModules = ["nouveau"];
 
   programs.zsh = {
     enable = true;
-    shellAliases = {
-      vim = "nvim";
-    };
+    shellAliases = { vim = "nvim"; };
     enableCompletion = true;
     autosuggestions.enable = true;
   };
 
   # Virtualbox stuff
-#virtualisation.virtualbox.guest.enable = true;
+  #virtualisation.virtualbox.guest.enable = true;
 
   # Enable the OpenSSH daemon.
   services.openssh = {
@@ -149,35 +146,33 @@ boot.blacklistedKernelModules = ["nouveau"];
     challengeResponseAuthentication = false;
   };
 
-    # Enable Wireguard
-    networking.wireguard.interfaces = {
+  # Enable Wireguard
+  networking.wireguard.interfaces = {
 
-      wg0 = {
+    wg0 = {
 
-        # Determines the IP address and subnet of the client's end of the
-        # tunnel interface.
-        ips = [ "192.168.7.2/24" ];
+      # Determines the IP address and subnet of the client's end of the
+      # tunnel interface.
+      ips = [ "192.168.7.2/24" ];
 
-        # Path to the private key file
-        privateKeyFile = "/secrets/wireguard/privatekey";
-        peers = [
-          {
-            # Public key of the server (not a file path).
-            publicKey = "XKqEk5Hsp3SRVPrhWD2eLFTVEYb9NYRky6AermPG8hU=";
+      # Path to the private key file
+      privateKeyFile = "/secrets/wireguard/privatekey";
+      peers = [{
+        # Public key of the server (not a file path).
+        publicKey = "XKqEk5Hsp3SRVPrhWD2eLFTVEYb9NYRky6AermPG8hU=";
 
-            # Don't forward all the traffic via VPN, only particular subnets
-            allowedIPs = [ "192.168.7.0/24" ];
+        # Don't forward all the traffic via VPN, only particular subnets
+        allowedIPs = [ "192.168.7.0/24" ];
 
-            # Server IP and port.
-            endpoint = "vpn.pablo.tools:51820";
+        # Server IP and port.
+        endpoint = "vpn.pablo.tools:51820";
 
-            # Send keepalives every 25 seconds. Important to keep NAT tables
-            # alive.
-            persistentKeepalive = 25;
-          }
-        ];
-      };
+        # Send keepalives every 25 seconds. Important to keep NAT tables
+        # alive.
+        persistentKeepalive = 25;
+      }];
     };
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -191,7 +186,7 @@ boot.blacklistedKernelModules = ["nouveau"];
 
   # Enable the X11 windowing system.
   services.xserver = {
-	videoDrivers = ["nvidia"];
+    videoDrivers = [ "nvidia" ];
     enable = true;
     autorun = true;
     layout = "us";
@@ -214,18 +209,12 @@ boot.blacklistedKernelModules = ["nouveau"];
       EndSection
     '';
 
-    desktopManager = {
-      xterm.enable = false;
-    };
+    desktopManager = { xterm.enable = false; };
 
-    displayManager = {
-      startx.enable = true;
-    };
+    displayManager = { startx.enable = true; };
   };
 
-  nixpkgs = {
-    config.allowUnfree = true;
-  };
+  nixpkgs = { config.allowUnfree = true; };
 
   # Backup with borgbackup to remote server. The connection key and repository
   # encryption passphrase is read from /secrets. This directory has to be
@@ -236,12 +225,10 @@ boot.blacklistedKernelModules = ["nouveau"];
     # configuration is generated by nixOS
     paths = "/home";
 
-
-
-
     # Remote servers repository to use. Archives will be labeled with the
     # hostname and a timestamp
-    repo = "ssh://borg@backup-server//mnt/backup/borgbackup/${config.networking.hostName}";
+    repo =
+      "ssh://borg@backup-server//mnt/backup/borgbackup/${config.networking.hostName}";
 
     # Don't create repo if it does not exist. Ensures the backup fails, if for
     # some reason the backup drive is not mounted or the path has changed.
@@ -309,14 +296,14 @@ boot.blacklistedKernelModules = ["nouveau"];
       isNormalUser = true;
       home = "/home/pinpox";
       description = "Pablo Ovelleiro Corral";
-      extraGroups = [ "wheel" "networkmanager" "audio"];
+      extraGroups = [ "wheel" "networkmanager" "audio" ];
       shell = pkgs.zsh;
 
       # Public ssh-keys that are authorized for the user. Fetched from homepage
       # and github profile.
       openssh.authorizedKeys.keyFiles = [
-        ( builtins.fetchurl { url = "https://pablo.tools/ssh-key"; })
-        ( builtins.fetchurl { url = "https://github.com/pinpox.keys"; })
+        (builtins.fetchurl { url = "https://pablo.tools/ssh-key"; })
+        (builtins.fetchurl { url = "https://github.com/pinpox.keys"; })
       ];
     };
   };
