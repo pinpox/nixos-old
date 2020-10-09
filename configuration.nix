@@ -74,14 +74,23 @@
   time.timeZone = "Europe/Berlin";
 
   # System-wide environment variables to be set
-  environment.variables = {
-    EDITOR = "nvim";
-    GOPATH = "~/.go";
-    VISUAL = "nvim";
-    # Use librsvg's gdk-pixbuf loader cache file as it enables gdk-pixbuf to load
-    # SVG files (important for icons)
-    GDK_PIXBUF_MODULE_FILE =
-      "$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)";
+  environment = {
+    variables = {
+      EDITOR = "nvim";
+      GOPATH = "~/.go";
+      VISUAL = "nvim";
+      # Use librsvg's gdk-pixbuf loader cache file as it enables gdk-pixbuf to load
+      # SVG files (important for icons)
+      GDK_PIXBUF_MODULE_FILE =
+        "$(echo ${pkgs.librsvg.out}/lib/gdk-pixbuf-2.0/*/loaders.cache)";
+    };
+
+    # Needed for yubikey to work
+    shellInit = ''
+      export GPG_TTY="$(tty)"
+      gpg-connect-agent /bye
+      export SSH_AUTH_SOCK="/run/user/$UID/gnupg/S.gpg-agent.ssh"
+    '';
   };
 
   # Needed for zsh completion of system packages, e.g. systemd
@@ -123,11 +132,16 @@
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
+  programs.ssh.startAgent = false;
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
-    pinentryFlavor = "gnome3";
+    pinentryFlavor = "gtk2";
+ # extraConfig = ''
+ #        pinentry-program ${pkgs.pinentry.gnome3}/bin/pinentry-gnome3
+ #      '';
   };
+
 
   programs.zsh = {
     enable = true;
@@ -138,6 +152,11 @@
 
   # Virtualbox stuff
   #virtualisation.virtualbox.guest.enable = true;
+
+  # Setup Yubikey SSH and GPG
+  services.pcscd.enable = true;
+  services.udev.packages = [ pkgs.yubikey-personalization ];
+
 
   # Enable the OpenSSH daemon.
   services.openssh = {
