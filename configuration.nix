@@ -114,6 +114,7 @@
     git
     zsh
     gnumake
+    nixfmt
   ];
 
   programs.dconf.enable = true;
@@ -137,11 +138,10 @@
     enable = true;
     enableSSHSupport = true;
     pinentryFlavor = "gtk2";
- # extraConfig = ''
- #        pinentry-program ${pkgs.pinentry.gnome3}/bin/pinentry-gnome3
- #      '';
+    # extraConfig = ''
+    #        pinentry-program ${pkgs.pinentry.gnome3}/bin/pinentry-gnome3
+    #      '';
   };
-
 
   programs.zsh = {
     enable = true;
@@ -156,7 +156,6 @@
   # Setup Yubikey SSH and GPG
   services.pcscd.enable = true;
   services.udev.packages = [ pkgs.yubikey-personalization ];
-
 
   # Enable the OpenSSH daemon.
   services.openssh = {
@@ -229,7 +228,16 @@
       EndSection
     '';
 
-    desktopManager = { xterm.enable = false; };
+    desktopManager = {
+      xterm.enable = false;
+      session = [{
+        name = "home-manager";
+        start = ''
+          ${pkgs.runtimeShell} $HOME/.hm-xsession &
+           waitPID=$!
+        '';
+      }];
+    };
 
     displayManager = { startx.enable = true; };
   };
@@ -298,7 +306,7 @@
   # Install some fonts system-wide, especially "Source Code Pro" in the
   # Nerd-Fonts pached version with extra glyphs.
   fonts = {
-    enableFontDir = true;
+    fontDir.enable = true;
     fonts = with pkgs; [
       (nerdfonts.override { fonts = [ "SourceCodePro" ]; })
       noto-fonts-emoji
