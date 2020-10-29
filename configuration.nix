@@ -42,6 +42,13 @@
     # Define the hostname
     hostName = "kartoffel";
 
+    # Defile the DNS servers
+    nameservers = [
+      "1.1.1.1"
+      "8.8.8.8"
+      "192.168.2.1"
+    ];
+
     # Enables wireless support via wpa_supplicant.
     # networking.wireless.enable = true;
 
@@ -60,7 +67,13 @@
 
     # Additional hosts to put in /etc/hosts
     extraHosts = ''
+      94.16.114.42 nix.own
+      94.16.114.42 lislon.nix.own
       192.168.2.84 backup-server
+      192.168.2.84 cloud.pablo.tools
+
+      10.10.10.212 bucket.htb
+      10.10.10.212 s3.bucket.htb
     '';
   };
 
@@ -99,8 +112,12 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    docker
+    docker-compose
+    qemu
     python
     ctags
+    openvpn
     ruby
     python
     borgbackup
@@ -150,8 +167,17 @@
     autosuggestions.enable = true;
   };
 
+  virtualisation.libvirtd = {
+    enable = true;
+    onBoot = "ignore";
+  };
+
+  virtualisation.docker.enable = true;
+
   # Virtualbox stuff
   #virtualisation.virtualbox.guest.enable = true;
+  # virtualisation.virtualbox.host.enable = true;
+  # virtualisation.virtualbox.host.enableExtensionPack = true;
 
   # Setup Yubikey SSH and GPG
   services.pcscd.enable = true;
@@ -201,7 +227,23 @@
 
   # Enable sound.
   sound.enable = true;
-  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio = {
+    enable = true;
+    package = pkgs.pulseaudioFull;
+    extraModules = [ pkgs.pulseaudio-modules-bt ];
+  };
+
+  hardware.bluetooth = {
+    enable = true;
+    # config = "
+    #   [General]
+    #   Enable=Source,Sink,Media,Socket
+    # ";
+  };
+
+  services.blueman.enable = true;
+
+
 
   # Enable the X11 windowing system.
   services.xserver = {
@@ -317,6 +359,11 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users = {
 
+    # For Virtualbox
+    # extraGroups = {
+    #   vboxusers.members = ["pinpox"];
+    # };
+
     # Shell is set to zsh for all users as default.
     defaultUserShell = pkgs.zsh;
 
@@ -324,7 +371,7 @@
       isNormalUser = true;
       home = "/home/pinpox";
       description = "Pablo Ovelleiro Corral";
-      extraGroups = [ "wheel" "networkmanager" "audio" ];
+      extraGroups = [ "docker" "wheel" "networkmanager" "audio" "libvirtd" "dialout"];
       shell = pkgs.zsh;
 
       # Public ssh-keys that are authorized for the user. Fetched from homepage
